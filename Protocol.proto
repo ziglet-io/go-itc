@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package itc;
+
+message Event {
+    uint32  Value   = 1;
+    bool    IsLeaf  = 2;
+    Event   Left    = 3;
+    Event   Right   = 4;
+}
+
+message Id {
+    uint32  Value   = 1;
+    bool    IsLeaf  = 2;
+    Id      Left    = 3;
+    Id      Right   = 4;
+}
+
+message Stamp {
+    Id      Id      = 1;
+    Event   Event   = 2;
+}
