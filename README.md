@@ -70,7 +70,13 @@ is:
   
  I sincerely hope that I'm missing something because with this feature,
  I cannot see how one site can begin working without coordinating with
- another site.
+ another site. Contrast this with Vector Clocks (especially Vector
+ Clocks that grow as new Identifiers are added). With these Vector
+ Clocks (or Version Vectors for that matter), a new site can begin
+ writing without coordination by simply adding their new (randomly?)
+ generated identifier to existing clock values. Where the identifier
+ does not exist as in versions prior to the new participant joining and
+ writing, the clock value is assumed to be _0_.
 
 # References
 
