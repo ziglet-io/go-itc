@@ -5,18 +5,8 @@ const GrowIncrement uint32 = 1000
 // Section 5 Define the seed stamp, THE starting value
 func SeedStamp() *Stamp {
     return &Stamp{
-        Id: &Id{
-            Value:1,
-            IsLeaf:true,
-            Left:nil,
-            Right:nil,
-        },
-        Event: &Event{
-            IsLeaf:true,
-            Value:0,
-            Left:nil,
-            Right:nil,
-        },
+        Id: NewId(1),
+        Event: NewEvent(0),
     }
 }
 
@@ -284,4 +274,12 @@ func (stamp *Stamp) Copy() *Stamp {
     }
 
     return &s
+}
+
+// Create a new stamp with premade Id and Event
+func NewStamp(id *Id, event *Event) *Stamp {
+    return &Stamp{
+        Id: id.Copy(),
+        Event: event.Copy(),
+    }
 }

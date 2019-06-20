@@ -8,14 +8,6 @@ import (
 	"testing"
 )
 
-func TestEventNormN(t *testing.T){
-	e := &itc.Event{
-		IsLeaf: true,
-		Value: 3,
-	}
-	assert.True(proto.Equal(e.Norm(),e),t)
-}
-
 func TestEventSimpleTree(t *testing.T){
 	e := &itc.Event{
 		IsLeaf: false,
@@ -86,4 +78,48 @@ func TestEventLeqOneTree(t *testing.T){
 	assert.False(e2.Leq(e1),t) // Change order
 }
 
+// Norm
+func TestEventNormBasic(t *testing.T){
+	e := itc.NewEvent(3)
+	assert.True(proto.Equal(e,e.Norm()),t)
+}
+
+func TestEventNormEqual(t *testing.T){
+	e := &itc.Event{
+		IsLeaf:false,
+		Value:2,
+		Left: itc.NewEvent(3),
+		Right: itc.NewEvent(3),
+	}
+	assert.True(proto.Equal(e.Norm(),itc.NewEvent(5)),t)
+}
+
+func TestEventNormTree(t *testing.T){
+	l := itc.NewEvent(2)
+	r := itc.NewEvent(3)
+	e := &itc.Event{
+		IsLeaf:false,
+		Value:4,
+		Left: l,
+		Right: r,
+	}
+
+	expected := &itc.Event{
+		IsLeaf: false,
+		Value: 6,
+		Left: itc.NewEvent(0),
+		Right: itc.NewEvent(1),
+	}
+
+	assert.True(proto.Equal(e.Norm(),expected),t)
+}
+
+// Join
+func TestEventJoinFlat(t *testing.T){
+	l := itc.NewEvent(0)
+	r := itc.NewEvent(1)
+	expected := itc.NewEvent(1)
+
+	assert.True(proto.Equal(l.Join(r),expected),t)
+}
 
