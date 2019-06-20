@@ -1,17 +1,20 @@
 package itc
 
+import (
+    "fmt"
+    "strings"
+)
+
 // Section 5.2 Reduce the size of the event tree by norming
 func (event *Event) Norm() *Event {
-    var e *Event
-
     // Case 1: Norm(n) -> n
     if event.IsLeaf {
-        e = event.Copy()
+        return event.Copy()
     }
 
     // Case 2: Norm((n,m,m)) -> (n+m) where m is an integer
     if !event.IsLeaf && event.Left.IsLeaf && event.Right.IsLeaf && event.Left.Value == event.Right.Value {
-        e = &Event{
+        return &Event{
             IsLeaf:true,
             Value:event.Value + event.Left.Value,
             Left:nil,
@@ -21,21 +24,20 @@ func (event *Event) Norm() *Event {
 
     // Case 3: Norm((n,e1,e2)) -> (n+m,e1.Sink(m),e2.Sink(m)) where m = Min(Min(e1),Min(e2))
     if !event.IsLeaf {
-        m := Min(event.Left.Min().Value,event.Right.Min().Value)
+        e := Event{}
+        m := Min(event.Left,event.Right)
 
-        e := event.Copy()
-        el := event.Left.Copy()
-        er := event.Right.Copy()
-
-        e.Value += m
-        el = event.Left.Sink(m)
-        er = event.Right.Sink(m)
+        e.Value += event.Value + m.Value
+        el := event.Left.Sink(m.Value)
+        er := event.Right.Sink(m.Value)
         e.IsLeaf = false
         e.Right=er
         e.Left=el
+
+        return &e
     }
 
-    return e
+    return nil
 }
 
 // Section 5.2 Lift the entire event tree by a constant value - used in norming
@@ -60,56 +62,28 @@ func (event *Event) Sink(m uint32) *Event {
 
 // Section 5.2 Get an event that represents the minimum event value in a tree of values
 func (event *Event) Min() *Event {
-    e := event.Copy()
 
-    if !e.IsLeaf {
-        ml := event.Left.Min()
-        mr := event.Right.Min()
-
-        e.Value += Min(ml.Value,mr.Value)
-
+    if !event.IsLeaf {
+        e := Min(event.Left.Min(),event.Right.Min())
+        e.Value += event.Value
+        return e
     } else {
-        // Nothing to do, return e
+        return event.Copy()
     }
 
-    return nil
 }
 
 // Section 5.2 Get an event that represents the maximum event value in a tree of values
 func (event *Event) Max() *Event {
-    e := event.Copy()
 
-    if !e.IsLeaf {
-        ml := e.Left.Max()
-        mr := e.Right.Max()
-
-        if e.Value >= ml.Value && e.Value >= mr.Value {
-            e = &Event{
-                Value:e.Value,
-                IsLeaf:true,
-                Right:nil,
-                Left:nil,
-            }
-        } else if ml.Value >= mr.Value {
-            e = &Event{
-                Value:ml.Value,
-                IsLeaf:true,
-                Left:nil,
-                Right:nil,
-            }
-        } else {
-            e = &Event{
-                Value:mr.Value,
-                IsLeaf:true,
-                Left:nil,
-                Right:nil,
-            }
-        }
+    if !event.IsLeaf {
+        e := Max(event.Left.Max(),event.Right.Max())
+        e.Value += event.Value
+        return e
     } else {
-        // Nothing, return e
+        return event.Copy()
     }
 
-    return e
 }
 
 // Section 5.3.1 Less or equals - relation that defines the partial order
@@ -139,7 +113,7 @@ func (event1 *Event) Join(event2 *Event) *Event {
     // Case 1: join(n1,n2) -> max(n1,n2)
     if event1.IsLeaf && event2.IsLeaf {
         e.IsLeaf = true
-        e.Value = Max(event1.Value,event2.Value)
+        e.Value = Max(event1.Max(),event2.Max()).Value
         return &e
     }
 
@@ -211,20 +185,49 @@ func (event *Event) Copy() *Event {
     return &e
 }
 
-// Simple min function over uint32
-func Min(a uint32,b uint32) uint32 {
-    if a>b {
-        return b
+func Max(a *Event, b *Event) *Event {
+    am := a.Max()
+    bm := b.Max()
+    if am.Value > bm.Value {
+        return am
     } else {
-        return a
+        return bm
     }
 }
 
-// Simple max function over uint32
-func Max(a uint32,b uint32) uint32 {
-    if a>b {
-        return a
+func Min(a *Event, b *Event) *Event {
+    am := a.Min()
+    bm := b.Min()
+    if am.Value < bm.Value {
+        return am
     } else {
-        return b
+        return bm
+    }
+}
+
+func (event *Event) Print() string {
+    var sb strings.Builder
+
+    if event.IsLeaf {
+        sb.WriteString(fmt.Sprint(event.Value))
+    } else {
+        sb.WriteString(fmt.Sprint(event.Value))
+        sb.WriteString(",")
+        sb.WriteString("(")
+        sb.WriteString(event.Left.Print())
+        sb.WriteString(",")
+        sb.WriteString(event.Right.Print())
+        sb.WriteString(")")
+    }
+
+    return sb.String()
+}
+
+func NewEvent(value uint32) *Event{
+    return &Event{
+        IsLeaf: true,
+        Value: value,
+        Left: nil,
+        Right: nil,
     }
 }
