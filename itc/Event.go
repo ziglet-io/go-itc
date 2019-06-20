@@ -127,11 +127,14 @@ func (event1 *Event) Join(event2 *Event) *Event {
             IsLeaf:true,
             Value:0,
         }
-        event1.IsLeaf = false
-        event1.Left = &a
-        event1.Right = &b
+        top := &Event{
+            IsLeaf: false,
+            Value: event1.Value,
+            Left: &a,
+            Right: &b,
+        }
 
-        return event1.Join(event2)
+        return top.Join(event2)
     }
 
     // Case 3: join((n1,l1,r1),n2) -> join((n1,l1,r1),(n2,l2,r2))
@@ -158,8 +161,8 @@ func (event1 *Event) Join(event2 *Event) *Event {
 
     // Case 5: join((n1,l1,r1),(n2,l2,r2)) -> Norm((n1,join(l1,l2.Lift(n2-n1),join(r1,r2.Lift(n2-n1)))
     if !event1.IsLeaf && !event2.IsLeaf {
-        left := event1.Left.Join(event2.Lift(event2.Value - event1.Value))
-        right := event1.Right.Join(event2.Lift(event2.Value - event1.Value))
+        left := event1.Left.Join(event2.Left.Lift(event2.Value - event1.Value))
+        right := event1.Right.Join(event2.Right.Lift(event2.Value - event1.Value))
 
         event := Event{
             IsLeaf: false,

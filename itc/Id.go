@@ -106,15 +106,10 @@ func (id1 *Id) Sum(id2 *Id) *Id{
     // Case 3: Sum((l1,r1),(l2,r2)) -> Norm((Sum(l1,l2),Sum(r1,r2)))
     // AKA Sum(i1,i2)
     if !id1.IsLeaf && !id2.IsLeaf {
-        fmt.Println(id1.Print())
-        fmt.Println(id2.Print())
-
         i := &Id{
             Left: id1.Left.Sum(id2.Left),
             Right: id1.Right.Sum(id2.Right),
         }
-
-        fmt.Println(i.Print())
 
         return i.Norm()
     }

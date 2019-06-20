@@ -1,5 +1,7 @@
 package itc
 
+import "github.com/gogo/protobuf/proto"
+
 const GrowIncrement uint32 = 1000
 
 // Section 5 Define the seed stamp, THE starting value
@@ -57,25 +59,21 @@ func (stamp *Stamp) Fork() (*Stamp, *Stamp) {
 func (s1 *Stamp) Join(s2 *Stamp) *Stamp {
     id := s1.Id.Sum(s2.Id)
     event := s1.Event.Join(s2.Event)
-    stamp := Stamp{
-        Id:id,
-        Event:event,
-    }
+    stamp := NewStamp(id,event)
 
-    return &stamp
+    return stamp
 }
 
 // Section 5.3.4 During Advance, attempt to simplify the event tree
 func (stamp *Stamp) Fill() *Event {
     // Case 1: fill(0,e) -> e
-    if stamp.Id.IsLeaf && stamp.Id.Value == 0 && !stamp.Event.IsLeaf{
+    if stamp.Id.IsLeaf && stamp.Id.Value == 0 {
         return stamp.Event
     }
 
     // Case 2: fill(1,e) -> max(e)
-    if stamp.Id.IsLeaf && stamp.Id.Value ==1 && !stamp.Event.IsLeaf {
-        event := stamp.Event.Max()
-        return event
+    if stamp.Id.IsLeaf && stamp.Id.Value ==1 {
+        return stamp.Event.Max()
     }
 
     // Case 3: fill(i,n) -> n
@@ -252,17 +250,11 @@ func (stamp *Stamp) Grow() (*Event,uint32) {
 func (stamp *Stamp) Advance() *Stamp {
     e := stamp.Fill()
 
-    if e != nil {
-        return &Stamp{
-            Id: stamp.Id.Copy(),
-            Event: e,
-        }
+    if !proto.Equal(e,stamp.Event){
+        return stamp.Copy()
     } else {
         e,_ := stamp.Grow()
-        return &Stamp{
-            Id: stamp.Id.Copy(),
-            Event: e,
-        }
+        return NewStamp(stamp.Id,e)
     }
 }
 
