@@ -56,9 +56,10 @@ The promise of ITCs is to permit **local** assignment of new sites
 through **fork** and retirement of sites through **join** yielding a
 dynamic identifier size and significant savings.
 
-**However** - if you examine the test _TestExampleUnknownSplitJoin_
-[here](./itc_test/Example_test.go) there is a problem. The expected flow
-is:
+**However** the two parties that will receive the results of either **fork** or **join** must coordinate at the time that the subdomains change.
+ 
+ For an example of why this is, examine the test _TestExampleUnknownSplitJoin_
+[here](./itc_test/Example_test.go). If we wanted a system where nodes did **not** need to collaborate during **fork** and **join** the desired flow would be :
 
 * An initial state is created with a seed stamp : _(1,0)_
 * Site _A_ begins writing yielding stamps like : _(1,1)_ ... _(1,n)_
@@ -68,16 +69,10 @@ is:
 * Later, _A_ learns of the writes by _B_ and wishes to join them. This
   does not work because the domains of _A_ and _B_ overlap.
   
- I sincerely hope that I'm missing something because with this feature,
- I cannot see how one site can begin working without coordinating with
- another site. Contrast this with Vector Clocks (especially Vector
- Clocks that grow as new Identifiers are added). With these Vector
- Clocks (or Version Vectors for that matter), a new site can begin
- writing without coordination by simply adding their new (randomly?)
- generated identifier to existing clock values. Where the identifier
- does not exist as in versions prior to the new participant joining and
- writing, the clock value is assumed to be _0_.
+In a context where the number of participants is relatively small and all are online together most of the time, this solution could be helpful. Consider a system of N replicas of a database. Normal operation has the database consisting of a small number of replicas all of whom are online together. Network partition or node failure is expected to quickly repaired. In this environment, ITCs could be an interesting solution to assigning portions of the identifier space to the replicas.
 
+Contrast this setting with Wikipedia, a collaborative editing environment where the number of participants theoretically could include the entire population and where participants go on and offline regularly. In this environment, the requirement for participants to communicate to partition the identifier space is unreasonable.
+ 
 # References
 
 * [1]: Lamport, Leslie. ["Time, Clocks, and the Ordering of Events in a Distributed
