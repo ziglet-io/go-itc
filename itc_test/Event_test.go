@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gogo/protobuf/proto"
 	"github.com/ipfs/go-ipfs/thirdparty/assert"
-	"github.com/saltatory/go-itc/itc"
+	"github.com/ziglet.io/go-itc/itc"
 	"testing"
 )
 

@@ -2,7 +2,7 @@ package itc_test
 
 import (
     "fmt"
-    "github.com/saltatory/go-itc/itc"
+    "github.com/ziglet.io/go-itc/itc"
     "testing"
 )
 
